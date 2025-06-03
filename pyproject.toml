@@ -1,39 +1,54 @@
 [project]
 name = "ghosttpy"
 description = "Add your description here"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = []
 
+# We use hatchling to build the wheel
 [build-system]
-requires = ["poetry-core", "ziggy-pydust==0.25.1"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "ziggy-pydust==0.25.1"] # 0.25.1 uses zig 0.14
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "ziggy-pydust-template"
-version = "0.1.0"
-description = ""
-authors = ["Fulcrum Inc. <hello@fulcrum.so>"]
-readme = "README.md"
-packages = [{ include = "fibonacci" }]
-include = [
-    { path = "src/", format = "sdist" },
-    { path = "fibonacci/*.so", format = "wheel" },
-    "fibonacci/*.pyi"
-]
+[tool.hatch.build.targets.wheel]
+packages = ["fibonacci"]
+artifacts = ["fibonacci/*.so"]
 
 [tool.poetry.build]
 script = "build.py"
 
-[tool.poetry.dependencies]
-python = "^3.11"
+[tool.hatch.build.targets.wheel]
+packages = ["fibonacci"]
+artifacts = ["fibonacci/*.so"]
 
-[tool.poetry.group.dev.dependencies]
-ziggy-pydust = "0.25.1"
-pytest = "^8.0.0"
-ruff = "^0.14.0"
+# We use a custom hook to build the wheel using pydust's build script
+[tool.hatch.build.targets.wheel.hooks.custom]
+
+# Configure pydust to use our own build.zig
+# It will still codegen pydust.build.zig
+[tool.pydust]
+self_managed = true
+
+# We use uv to manage our dev dependencies
+[tool.uv]
+dev-dependencies = [
+    "ziggy-pydust==0.25.1",
+    "pytest>=8.0.0",
+    "ruff=>"^0.14.0",
+]
 
 [tool.ruff]
 line-length = 120
+target-version = "py313"
+src = ["fibonacci"]
+lint.select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "N",  # pep8-naming
+]
+lint.ignore = []
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint]
 select = ["F", "E", "W", "UP", "I001", "I002"]
