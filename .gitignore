@@ -1,3 +1,7 @@
+.zig-cache/
+zig-out/
+*.o
+
 ### VisualStudioCode template
 .vscode/*
 !.vscode/settings.json
